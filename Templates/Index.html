@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My To-Do List - PyCharm Project</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .add-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .task {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .task.completed {
+            background: #f0fdf4;
+            opacity: 0.8;
+        }
+
+        .task-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .task-description {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .task-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-complete {
+            background: #10b981;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .btn-pending {
+            background: #f59e0b;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 My To-Do List</h1>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">{{ tasks|length }}</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">{{ tasks|selectattr('status', 'equalto', 'completed')|list|length }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">{{ tasks|selectattr('status', 'equalto', 'pending')|list|length }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+
+        <div class="add-form">
+            <form method="POST" action="/add">
+                <input type="text" name="title" placeholder="Task title..." required>
+                <textarea name="description" placeholder="Description (optional)" rows="3"></textarea>
+                <button type="submit">➕ Add Task</button>
+            </form>
+        </div>
+
+        {% if tasks %}
+            {% for task in tasks %}
+                <div class="task {% if task.status == 'completed' %}completed{% endif %}">
+                    <div class="task-title">{{ task.title }}</div>
+                    {% if task.description %}
+                        <div class="task-description">{{ task.description }}</div>
+                    {% endif %}
+                    <div class="task-date">
+                        Created: {{ task.created_at[:16] if task.created_at else 'Just now' }}
+                    </div>
+                    <div class="buttons">
+                        {% if task.status == 'pending' %}
+                            <a href="/complete/{{ task.id }}" class="btn-complete">✓ Mark Complete</a>
+                        {% else %}
+                            <a href="/pending/{{ task.id }}" class="btn-pending">↻ Mark Pending</a>
+                        {% endif %}
+                        <a href="/delete/{{ task.id }}" class="btn-delete" onclick="return confirm('Delete this task?')">🗑 Delete</a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty">
+                <h3>No tasks yet!</h3>
+                <p>Add your first task above 👆</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
